@@ -5,6 +5,17 @@ import time
 from pyrogram import enums
 from random import Random
 
+import string
+
+def preprocess_text(text):
+    # Преобразование в lowercase
+    text_lower = text.lower()
+    
+    # Удаление знаков препинания
+    text_no_punctuation = text_lower.translate(str.maketrans("", "", string.punctuation))
+    
+    return text_no_punctuation
+
 from gpt import gpt
 
 api_id = 12345
@@ -41,9 +52,12 @@ async def echo(client, message):
             conversation.append({"role": "user", "content": f"{item.from_user.first_name}: {text}"})
             
     conversation = list(reversed(conversation))
-    await app.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+    
     await app.read_chat_history(message.chat.id)
-    time.sleep(10)
+    await app.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+    time.sleep(5)
+    await app.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
+    time.sleep(5)
     last_msg = [i async for i in app.get_chat_history(message.chat.id, limit=1)][0]
 
     if crt_timestamp == None or crt_timestamp ==  last_msg.date.timestamp():
@@ -52,7 +66,7 @@ async def echo(client, message):
             txt = txt.split(':')[1]
         print(f'Переключение в режим typing и ожидание {len(txt)//10+1} секунд')
         time.sleep(len(txt)//10+1)
-        await message.reply(txt)
+        await message.reply(preprocess_text(txt))
     else:
         print('skip')
         
