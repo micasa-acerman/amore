@@ -54,10 +54,8 @@ async def echo(client, message):
     conversation = list(reversed(conversation))
     
     await app.read_chat_history(message.chat.id)
-    await app.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
     time.sleep(5)
     await app.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
-    time.sleep(5)
     last_msg = [i async for i in app.get_chat_history(message.chat.id, limit=1)][0]
 
     if crt_timestamp == None or crt_timestamp ==  last_msg.date.timestamp():
@@ -65,6 +63,7 @@ async def echo(client, message):
         if txt.find(':') != -1:
             txt = txt.split(':')[1]
         print(f'Переключение в режим typing и ожидание {len(txt)//10+1} секунд')
+        await app.send_chat_action(message.chat.id, enums.ChatAction.TYPING)
         time.sleep(len(txt)//10+1)
         await message.reply(preprocess_text(txt))
     else:
